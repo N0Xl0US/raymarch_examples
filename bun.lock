@@ -1,0 +1,15 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "webgpu-raymarcher",
+      "dependencies": {
+        "imgui": "^1.0.10",
+      },
+    },
+  },
+  "packages": {
+    "imgui": ["imgui@1.0.10", "", {}, "sha512-5RU9zDA3x2bENruds2/8R7nhmJYPJ39dgDy4vUPgYYoAdTeqnwBR4Ih+Tf1jwUOT4qxhcomFkldLzvrFnwDjrg=="],
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "webgpu-raymarcher",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "bun run server.js"
+  },
+  "dependencies": {
+    "imgui": "^1.0.10"
+  }
+}
