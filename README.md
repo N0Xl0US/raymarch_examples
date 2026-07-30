@@ -2,7 +2,9 @@
 
 An interactive, real-time [Menger sponge](https://en.wikipedia.org/wiki/Menger_sponge) renderer built entirely on the [WebGPU](https://gpuweb.github.io/gpuweb/) API. Everything runs on the GPU. The scene is raymarched every frame directly in a WGSL compute/fragment shader.
 
-![Screenshot](https://raw.githubusercontent.com/N0Xl0US/menger_sponge_raymarch/main/preview.png)
+<p align="center">
+  <img src="public/hero.png" alt="Menger Sponge">
+</p>
 
 ---
 
