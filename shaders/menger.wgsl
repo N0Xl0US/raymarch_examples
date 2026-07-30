@@ -1,12 +1,13 @@
 /*
  * shaders/menger.wgsl — Menger Sponge, balanced quality/performance
  *
- * sdMenger  : IQ formula, 5 iterations  — adds one extra detail level vs 4,
- *             still orders of magnitude faster than the old octree approach.
+ * sdMenger  : IQ formula, 5 iterations  — fine sub-cell detail.
  * calcNormal: 4-sample tetrahedron — same quality as 6-sample, 33% fewer evals.
- * raymarch  : calls sdMenger directly, no wrapper overhead.
- * softShadow: 40 steps — smooth penumbras without the full 64-step cost.
- * FAR       : 30  — allows wider camera pull-back without pop-in.
+ * raymarch  : 96 steps, epsilon = max(0.0002, 0.0001*t) — absolute floor
+ *             prevents micro-stepping when the camera is very close.
+ * softShadow: 20 steps — smooth penumbras at half the old cost.
+ * calcAO    : 4 samples — one fewer SDF call vs 5-sample version.
+ * FAR       : 30  — allows wide camera pull-back without pop-in.
  */
 
 struct Uniforms {
@@ -108,8 +109,8 @@ fn calcNormal(p: vec3<f32>) -> vec3<f32> {
 
 fn calcAO(p: vec3<f32>, n: vec3<f32>) -> f32 {
   var occ = 0.0; var sca = 1.0;
-  for (var i = 0; i < 5; i++) {
-    let h  = 0.01 + 0.12 * f32(i) / 4.0;
+  for (var i = 0; i < 4; i++) {  // 4 samples: one fewer SDF call vs 5-sample
+    let h  = 0.01 + 0.12 * f32(i) / 3.0;
     occ   += (h - sdMenger(p + h * n)) * sca;
     sca   *= 0.95;
   }
@@ -118,7 +119,7 @@ fn calcAO(p: vec3<f32>, n: vec3<f32>) -> f32 {
 
 fn softShadow(ro: vec3<f32>, rd: vec3<f32>, mint: f32, k: f32) -> f32 {
   var res = 1.0; var t = mint;
-  for (var i = 0; i < 40; i++) {
+  for (var i = 0; i < 20; i++) {  // 20 steps: half the old cost, still smooth
     if (t >= FAR) { break; }
     let h = sdMenger(ro + rd * t);
     if (h < 0.0001) { return 0.0; }
@@ -132,10 +133,12 @@ fn softShadow(ro: vec3<f32>, rd: vec3<f32>, mint: f32, k: f32) -> f32 {
 
 fn raymarch(ro: vec3<f32>, rd: vec3<f32>) -> f32 {
   var t = 0.01;
-  for (var i = 0; i < 128; i++) {
+  for (var i = 0; i < 96; i++) {  // 96 steps: tighter budget, rarely saturates
     let h = sdMenger(ro + rd * t);
-    if (h < 0.00015 * t) { break; }
-    if (t > FAR)          { break; }
+    // Absolute epsilon floor: prevents micro-stepping when camera is very close.
+    // Pure relative 0.00015*t approaches 0 when t is tiny, causing stalls.
+    if (h < max(0.0002, 0.0001 * t)) { break; }
+    if (t > FAR)                      { break; }
     t += h;
   }
   return t;
