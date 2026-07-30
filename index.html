@@ -29,11 +29,24 @@
       border-radius: 8px; font-size: 12px;
       pointer-events: none; user-select: none;
     }
+
+    #fps {
+      position: fixed; right: 12px; top: 12px; z-index: 5;
+      padding: 4px 10px;
+      color: #7effa0;
+      background: rgba(8,12,24,0.72);
+      border: 1px solid rgba(80,220,120,0.28);
+      border-radius: 8px; font-size: 13px; font-weight: 600;
+      letter-spacing: 0.03em;
+      pointer-events: none; user-select: none;
+      transition: color 0.4s;
+    }
   </style>
 </head>
 <body>
   <canvas id="canvas"></canvas>
   <div id="status">Initializing...</div>
+  <div id="fps">-- fps</div>
   <script type="module" src="main.js"></script>
 </body>
 </html>

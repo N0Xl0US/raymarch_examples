@@ -113,6 +113,7 @@ async function fetchShader( path ) {
 async function init() {
   const canvas = document.getElementById( 'canvas' );
   const status = document.getElementById( 'status' );
+  const fpsEl  = document.getElementById( 'fps' );
 
   const { device, context, format } = await createRenderer( canvas );
 
@@ -149,12 +150,23 @@ async function init() {
     frameIndex++;
     if ( framesFilled < FPS_WINDOW ) framesFilled++;
 
-    if ( pointerLocked && status && now - lastFpsUpdate > 1000 ) {
+    if ( now - lastFpsUpdate > 200 ) {  // refresh 5×/sec
       lastFpsUpdate = now;
       if ( framesFilled >= 2 ) {
-        const oldest  = frameTimes[ frameIndex % FPS_WINDOW ] ?? frameTimes[0];
-        const fps     = Math.round( ( framesFilled - 1 ) / ( now - oldest ) * 1000 );
-        status.textContent = `WebGPU · Menger Sponge · ${ fps } fps  [Esc to release]`;
+        const oldest = frameTimes[ frameIndex % FPS_WINDOW ] ?? frameTimes[0];
+        const fps    = Math.round( ( framesFilled - 1 ) / ( now - oldest ) * 1000 );
+
+        if ( fpsEl ) {
+          fpsEl.textContent = `${ fps } fps`;
+          // Green ≥60, yellow 30-59, red <30
+          fpsEl.style.color = fps >= 60 ? '#7effa0'
+                            : fps >= 30 ? '#ffe066'
+                            :             '#ff6060';
+        }
+
+        if ( pointerLocked && status ) {
+          status.textContent = `WebGPU · Menger Sponge  [Esc to release]`;
+        }
       }
     }
 
